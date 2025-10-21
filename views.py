@@ -9,6 +9,7 @@ from rest_framework import status
 from transformers import pipeline
 import time
 import logging
+from django.db import connection
 
 
 logger = logging.getLogger(__name__)
@@ -39,7 +40,7 @@ def load_model():
 @api_view(['POST'])
 @permission_classes([AllowAny])
 
-def register(request):
+def register(self,request):
     try:
         username = request.data.get("username")
         password = request.data.get("password")
@@ -65,7 +66,7 @@ def register(request):
         },status=status.HTTP_201_CREATED)
 
     except Exception as e:
-        return error(str(e))
+        return self.error(str(e))
     
 
 # load model
@@ -75,54 +76,68 @@ load_model()
 class Analyze(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request):
-        user = request.user
-        text = request.data.get("text","").strip()
-
-        if not text:
-            logger.warning(f"User {user.username} submitted empty text")
-            return error("Text is required")
-        
-        max_length = 5000
-        if len(text) > max_length:
-            logger.warning(f"User {user.username} submitted text exceeding max limit. Text length: {len(text)}")
-            return error(f"Text length should be less than {max_length} characters")
-        
-        if not SENTIMENT_ANALYZER:
-            logger.error("Sentiment model is not loaded")
-            return error("Sentiment analysis model currently unavailable")
         try:
-            submission = TextSubmission.objects.create(user=user, original_text=text)
-            logger.info(f"Sumission created successfully with id: {submission.id}")
-        except Exception as e:
-            logger.error(f"Failed to create text submission: {str(e)}")
             
-        start_time = time.time()
-        result = SENTIMENT_ANALYZER(text)
-        end_time = time.time()
-        
-        SentimentAnalysisResult.objects.create(
-            submission = submission,
-            emotion = result[0]["label"],
-            confidence_score = result[0]["score"],
-            model_used = "distilbert-base-uncased-finetuned-sst-2-english",
-            processing_time_ms = int((end_time - start_time)*1000)
-        )
-        
-        return Response({
-            "success": True,
-            "message": "Text analyzed successfully",
-            "data": {
-                "username": user.username,
-                "text": text,
-                "result": result
-            }
-        },status=status.HTTP_200_OK)
+            user = request.user
+            text = request.data.get("text","").strip()
+            logger.info(f"User {user.username} submitted text for analysis")
+
+            if not text:
+                logger.warning(f"User {user.username} submitted empty text")
+                return error("Text is required")
+            
+            max_length = 5000
+            if len(text) > max_length:
+                logger.warning(f"User {user.username} submitted text exceeding max limit. Text length: {len(text)}")
+                return error(f"Text length should be less than {max_length} characters")
+            
+            if not SENTIMENT_ANALYZER:
+                logger.error("Sentiment model is not loaded")
+                return error("Sentiment analysis model currently unavailable")
+            try:
+                submission = TextSubmission.objects.create(user=user, original_text=text)
+                logger.info(f"Sumission created successfully with id: {submission.id}")
+            except Exception as e:
+                logger.error(f"Failed to create text submission: {str(e)}")
+                
+            start_time = time.time()
+            result = SENTIMENT_ANALYZER(text)
+            end_time = time.time()
+            
+            SentimentAnalysisResult.objects.create(
+                submission = submission,
+                emotion = result[0]["label"],
+                confidence_score = result[0]["score"],
+                model_used = "distilbert-base-uncased-finetuned-sst-2-english",
+                processing_time_ms = int((end_time - start_time)*1000)
+            )
+            
+            return Response({
+                "success": True,
+                "message": "Text analyzed successfully",
+                "data": {
+                    "username": user.username,
+                    "text": text,
+                    "result": result
+                }
+            },status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Unexpected error occured in sentiment analysis: {str(e)}")
+            return error(message = str(e))
     
     def get(self, request):
         user = request.user
+        logger.info(f"User {user.username} requested analysis data")
         text = TextSubmission.objects.filter(user=user)
         original_text = list(text.values('original_text'))
         all_results = SentimentAnalysisResult.objects.filter(submission__user = user)
+        if not all_results:
+            logger.info(f"Sentiment analysis QuerySet is empty for {user.username}")
+            return Response({
+                "success":True,
+                "message": f"No analysis data found for {user.username}"
+                }, status=status.HTTP_200_OK)
+        
         values =  list(all_results.values('submission','emotion', 'confidence_score', 'created_at'))
 
         results = {}
@@ -133,7 +148,7 @@ class Analyze(APIView):
                 "confidence_score": values[i]['confidence_score'],
                 "created_at": values[i]['created_at']
             }
-
+        logger.info(f"Successfully fetched analysis history for {user.username}")
         return Response({
             "success": True,
             "message": "Fecthed analysis data",
@@ -141,4 +156,29 @@ class Analyze(APIView):
                 "username": user.username,
                 "results": results
             }
-        })
+        }, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def health(request):
+    logger.info("Checking server health")
+    try:
+        # db connection status
+        connection.ensure_connection()
+        db_status = "connected"
+        logger.info("Database connection OK")
+
+        return Response({
+            "success": True,
+            "message": "Server is healthy"
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+        logger.warning(f"Database connection status: {db_status}")
+
+        return error(
+            message=f"Error in database connection. Status: {db_status}"
+            )
+
+    
