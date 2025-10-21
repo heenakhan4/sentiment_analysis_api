@@ -10,6 +10,7 @@ from transformers import pipeline
 import time
 import logging
 from django.db import connection
+from django.utils import timezone
 
 
 logger = logging.getLogger(__name__)
@@ -162,23 +163,49 @@ class Analyze(APIView):
 @permission_classes([AllowAny])
 def health(request):
     logger.info("Checking server health")
-    try:
-        # db connection status
-        connection.ensure_connection()
-        db_status = "connected"
-        logger.info("Database connection OK")
-
-        return Response({
-            "success": True,
-            "message": "Server is healthy"
-        }, status=status.HTTP_200_OK)
+    start_time = time.time()
     
-    except Exception as e:
-        db_status = f"error: {str(e)}"
-        logger.warning(f"Database connection status: {db_status}")
+    health = {
+        "status": "ok",
+        "checks":{}
+    }
 
-        return error(
-            message=f"Error in database connection. Status: {db_status}"
-            )
+    # app check
+    health["checks"]["app"] = "running"
+
+    # db connection status
+    try:
+        connection.ensure_connection()
+        health["checks"]["db"] = "connected"
+        logger.info("Database connection -- OK")
+    except Exception as e:
+        health["status"] = "degraded"
+        health["checks"]["db"] = f"error: {str(e)}"
+        logger.warning(f"Error in database connection. Status: {health['checks']['db']}")
+
+    # HuggingFace model status
+    try:
+        if SENTIMENT_ANALYZER is not None:
+            health["checks"]["model"] = "loaded"
+            logger.info("HuggingFace Sentiment model -- OK")
+        else:
+            health["status"] = "degraded"
+            health["checks"]["model"] = "not loaded"
+            logger.warning("HuggingFace Sentiment model -- NOT OK")
+    except Exception as e:
+        health["status"] = "degraded"
+        health["checks"]["model"] = f"error: {str(e)}"
+        logger.warning(f"Error in HuggingFace Sentiment model. Status: {health['checks']['model']}")
+
+    health["response_time_ms"] = int((time.time() - start_time)*1000)
+    health["timestamp"] = timezone.now().isoformat()
+    logger.info("Health check completed")
+
+    return Response({
+        "success": True,
+        "health": health
+    }, status=status.HTTP_200_OK if health["status"] == "ok" else status.HTTP_503_SERVICE_UNAVAILABLE)
+    
+    
 
     
