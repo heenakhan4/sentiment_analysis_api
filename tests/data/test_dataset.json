@@ -1,0 +1,302 @@
+[
+  {
+    "text": "That presentation went way better than I expected! So proud of the team.",
+    "expected_sentiment": "positive",
+    "confidence_level": "high"
+  },
+  {
+    "text": "Can’t believe I finally finished the marathon! Feels amazing 🏅",
+    "expected_sentiment": "positive",
+    "confidence_level": "high"
+  },
+  {
+    "text": "The new café near my office is absolutely delightful — their coffee is heavenly ☕✨.",
+    "expected_sentiment": "positive",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "Just got a surprise visit from my best friend after two years! My heart is full ❤️.",
+    "expected_sentiment": "positive",
+    "confidence_level": "high"
+  },
+  {
+    "text": "I love when things fall perfectly into place without even trying.",
+    "expected_sentiment": "positive",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "Got promoted today! Hard work really does pay off.",
+    "expected_sentiment": "positive",
+    "confidence_level": "high"
+  },
+  {
+    "text": "This weather is making me so happy, sunshine after a week of rain 🌞.",
+    "expected_sentiment": "positive",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "Honestly, I’m just grateful for the little things lately.",
+    "expected_sentiment": "positive",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "What a wholesome movie — it actually made me smile through tears.",
+    "expected_sentiment": "positive",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "Best. Concert. Ever. Still can’t believe I was there!",
+    "expected_sentiment": "positive",
+    "confidence_level": "high"
+  },
+  {
+    "text": "Why does everything have to go wrong at the same time?",
+    "expected_sentiment": "negative",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "I studied all night and still messed up the exam. I’m done.",
+    "expected_sentiment": "negative",
+    "confidence_level": "high"
+  },
+  {
+    "text": "That customer service call just ruined my entire mood.",
+    "expected_sentiment": "negative",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "Feeling so drained lately. Nothing seems to work out.",
+    "expected_sentiment": "negative",
+    "confidence_level": "high"
+  },
+  {
+    "text": "Can’t believe people can be this rude online.",
+    "expected_sentiment": "negative",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "Another rejection email. Starting to lose faith in myself.",
+    "expected_sentiment": "negative",
+    "confidence_level": "high"
+  },
+  {
+    "text": "I hate how things keep changing when I’m finally getting comfortable.",
+    "expected_sentiment": "negative",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "That meal was overpriced and honestly disgusting.",
+    "expected_sentiment": "negative",
+    "confidence_level": "high"
+  },
+  {
+    "text": "Ugh, Monday mornings are the worst.",
+    "expected_sentiment": "negative",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "Everything I touch seems to fall apart lately.",
+    "expected_sentiment": "negative",
+    "confidence_level": "high"
+  },
+  {
+    "text": "The meeting starts at 3 PM, don’t forget to bring the report.",
+    "expected_sentiment": "neutral",
+    "confidence_level": "high"
+  },
+  {
+    "text": "I’ll call you once I reach the airport.",
+    "expected_sentiment": "neutral",
+    "confidence_level": "high"
+  },
+  {
+    "text": "The movie was okay, not great, not terrible.",
+    "expected_sentiment": "neutral",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "I think we should try the new restaurant and decide for ourselves.",
+    "expected_sentiment": "neutral",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "It’s just one of those average days — nothing special.",
+    "expected_sentiment": "neutral",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "Got the groceries and cleaned the kitchen, now time for a nap.",
+    "expected_sentiment": "neutral",
+    "confidence_level": "high"
+  },
+  {
+    "text": "Traffic was normal today, surprisingly.",
+    "expected_sentiment": "neutral",
+    "confidence_level": "high"
+  },
+  {
+    "text": "I’m not sure how I feel about it yet; still thinking.",
+    "expected_sentiment": "neutral",
+    "confidence_level": "low"
+  },
+  {
+    "text": "He said he’d send the file tomorrow.",
+    "expected_sentiment": "neutral",
+    "confidence_level": "high"
+  },
+  {
+    "text": "Just saw the news update — seems like a normal day in politics.",
+    "expected_sentiment": "neutral",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "Finally finished the project. Relieved, but also exhausted.",
+    "expected_sentiment": "mixed",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "I love my job, but the workload lately is killing me.",
+    "expected_sentiment": "mixed",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "Dinner was good, but service took forever.",
+    "expected_sentiment": "mixed",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "I miss home, but this city has its charm.",
+    "expected_sentiment": "mixed",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "That movie had great visuals, but the story was kinda meh.",
+    "expected_sentiment": "mixed",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "Glad it’s Friday, but my weekend’s already packed with chores.",
+    "expected_sentiment": "mixed",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "It’s nice to be appreciated, even if it took them long enough.",
+    "expected_sentiment": "mixed",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "Got the promotion, but it comes with so much pressure.",
+    "expected_sentiment": "mixed",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "Met some amazing people today, though I still feel a bit out of place.",
+    "expected_sentiment": "mixed",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "It’s not perfect, but it’s progress — I’ll take it.",
+    "expected_sentiment": "mixed",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "I’ve never been this angry in my life. How could they do that to me?",
+    "expected_sentiment": "negative",
+    "confidence_level": "high"
+  },
+  {
+    "text": "I’m literally shaking right now — can’t believe this just happened!!!",
+    "expected_sentiment": "ambiguous",
+    "confidence_level": "high"
+  },
+  {
+    "text": "This is the happiest day ever! Everything feels unreal 😭❤️.",
+    "expected_sentiment": "positive",
+    "confidence_level": "high"
+  },
+  {
+    "text": "I’m heartbroken. It’s like the world just stopped moving.",
+    "expected_sentiment": "negative",
+    "confidence_level": "high"
+  },
+  {
+    "text": "SO. MUCH. JOY. I could scream!!! 😭✨.",
+    "expected_sentiment": "positive",
+    "confidence_level": "high"
+  },
+  {
+    "text": "That comment made my blood boil. Absolutely unacceptable.",
+    "expected_sentiment": "negative",
+    "confidence_level": "high"
+  },
+  {
+    "text": "Tears of happiness. I didn’t think I’d see this day.",
+    "expected_sentiment": "positive",
+    "confidence_level": "high"
+  },
+  {
+    "text": "Completely devastated. I don’t even have words.",
+    "expected_sentiment": "negative",
+    "confidence_level": "high"
+  },
+  {
+    "text": "Pure bliss right now — everything feels perfect.",
+    "expected_sentiment": "positive",
+    "confidence_level": "high"
+  },
+  {
+    "text": "I can’t stop crying. It hurts more than I imagined.",
+    "expected_sentiment": "negative",
+    "confidence_level": "high"
+  },
+  {
+    "text": "I guess today wasn’t too bad.",
+    "expected_sentiment": "ambiguous",
+    "confidence_level": "low"
+  },
+  {
+    "text": "It could’ve gone worse, I suppose.",
+    "expected_sentiment": "ambiguous",
+    "confidence_level": "low"
+  },
+  {
+    "text": "I don’t know if I’m happy or just relieved.",
+    "expected_sentiment": "ambiguous",
+    "confidence_level": "low"
+  },
+  {
+    "text": "It’s fine, I guess. Whatever.",
+    "expected_sentiment": "ambiguous",
+    "confidence_level": "low"
+  },
+  {
+    "text": "I mean… it’s okay, I guess?",
+    "expected_sentiment": "ambiguous",
+    "confidence_level": "low"
+  },
+  {
+    "text": "Kinda disappointed but not surprised.",
+    "expected_sentiment": "ambiguous",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "Not thrilled, but not upset either.",
+    "expected_sentiment": "ambiguous",
+    "confidence_level": "medium"
+  },
+  {
+    "text": "It is what it is.",
+    "expected_sentiment": "neutral",
+    "confidence_level": "low"
+  },
+  {
+    "text": "That was interesting, I think?",
+    "expected_sentiment": "ambiguous",
+    "confidence_level": "low"
+  },
+  {
+    "text": "I’m not sure how to feel about this yet.",
+    "expected_sentiment": "ambiguous",
+    "confidence_level": "low"
+  }
+]

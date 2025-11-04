@@ -5,12 +5,14 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.views import APIView
 from django.contrib.auth.models import User
 from .models import TextSubmission, SentimentAnalysisResult
+from .serializers import *
 from rest_framework import status
-from transformers import pipeline
+from transformers import pipeline, DistilBertTokenizer, DistilBertForSequenceClassification
 import time
 import logging
 from django.db import connection
 from django.utils import timezone
+import torch
 
 
 logger = logging.getLogger(__name__)
@@ -23,25 +25,31 @@ def error(message):
     }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # module loading function
-SENTIMENT_ANALYZER = None
+TOKENIZER, MODEL = None, None
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
-def load_model():
-    global SENTIMENT_ANALYZER
+def load_model(model_id):
+    global TOKENIZER, MODEL
     try:
         logger.info("Loading sentiment model")
-        SENTIMENT_ANALYZER = pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english")
-        logger.info("Sentiment model loaded successfully")
+        
+        TOKENIZER = DistilBertTokenizer.from_pretrained(model_id)
+        MODEL = DistilBertForSequenceClassification.from_pretrained(model_id)
+        
+        MODEL.to(DEVICE)
 
+        logger.info(f"Sentiment model loaded successfully on device: {DEVICE}")
+    
     except Exception as e:
-        logger.error(f"Failed to laded sentiment model: {str(e)}")
-        SENTIMENT_ANALYZER = None
+        logger.error(f"Failed to load sentiment model: {str(e)}")
+        TOKENIZER, MODEL = None, None
         
 
 # register user
 @api_view(['POST'])
 @permission_classes([AllowAny])
 
-def register(self,request):
+def register(request):
     try:
         username = request.data.get("username")
         password = request.data.get("password")
@@ -67,20 +75,20 @@ def register(self,request):
         },status=status.HTTP_201_CREATED)
 
     except Exception as e:
-        return self.error(str(e))
+        return error(str(e))
     
 
 # load model
-load_model()
+load_model(model_id="joeddav/distilbert-base-uncased-go-emotions-student")
 
 # Sentiment Analysis
 class Analyze(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request):
         try:
-            
             user = request.user
             text = request.data.get("text","").strip()
+            type = request.data.get("type","")
             logger.info(f"User {user.username} submitted text for analysis")
 
             if not text:
@@ -92,7 +100,7 @@ class Analyze(APIView):
                 logger.warning(f"User {user.username} submitted text exceeding max limit. Text length: {len(text)}")
                 return error(f"Text length should be less than {max_length} characters")
             
-            if not SENTIMENT_ANALYZER:
+            if not TOKENIZER or not MODEL:
                 logger.error("Sentiment model is not loaded")
                 return error("Sentiment analysis model currently unavailable")
             try:
@@ -101,25 +109,74 @@ class Analyze(APIView):
             except Exception as e:
                 logger.error(f"Failed to create text submission: {str(e)}")
                 
-            start_time = time.time()
-            result = SENTIMENT_ANALYZER(text)
-            end_time = time.time()
+            try:
+                start_time = time.time()
+                # result = SENTIMENT_ANALYZER(text)
+                # Tokenize input
+                inputs = TOKENIZER(
+                    text,
+                    return_tensors="pt",
+                    truncation=True,
+                    max_length=512,
+                    padding=True
+                )
+                
+                # Move inputs to same device as model
+                inputs = {key: value.to(DEVICE) for key, value in inputs.items()}
+                
+                # Step 2: Run inference (no gradient calculation needed)
+                with torch.no_grad():
+                    outputs = MODEL(**inputs)
+                
+                # ------ MULTI-CLASS CLASSIFICATION ------
+                # Step 3: Get logits and convert to probabilities
+                logits = outputs.logits
+                if type=="multiclass":
+                    probabilities = torch.softmax(logits, dim=-1)
+
+                    # Step 4: Get predicted class and confidence
+                    predicted_class = torch.argmax(probabilities, dim=-1).item()
+                    confidence_score = probabilities[0][predicted_class].item()
+                
+                    # Step 5: Map class to emotion label
+                    emotion = "POSITIVE" if predicted_class == 1 else "NEGATIVE"
+                else:
+                    probabilities = torch.sigmoid(logits)
+                    print(probabilities)
+                    labels = [MODEL.config.id2label[i] for i in range(MODEL.config.num_labels)]
+                    print(labels)
+                    threshold = 0.5
+                    predicted = (probabilities[0] > threshold).nonzero(as_tuple=True)[0]
+                    emotion = [labels[i] for i in predicted]
+                    confidence_score = [probabilities[0][i].item() for i in predicted]
+                    for label, score in zip(emotion, confidence_score):
+                        print(f"{label}: {score:.4f}")
+
+                
+                end_time = time.time()
+                logger.info(f"Sentiment analysis completed for submission with id: {submission.id}")
+            except Exception as e:
+                logger.error(f"Unexpected error occured in sentiment analysis: {str(e)}. Deleting submission with id: {submission.id}")
+                submission.delete()
+                return error(message = str(e))
             
             SentimentAnalysisResult.objects.create(
                 submission = submission,
-                emotion = result[0]["label"],
-                confidence_score = result[0]["score"],
+                emotion = emotion,
+                confidence_score = confidence_score[0],
                 model_used = "distilbert-base-uncased-finetuned-sst-2-english",
                 processing_time_ms = int((end_time - start_time)*1000)
             )
-            
+
             return Response({
                 "success": True,
                 "message": "Text analyzed successfully",
                 "data": {
                     "username": user.username,
-                    "text": text,
-                    "result": result
+                    "result": {
+                        "label": emotion, 
+                        "score": confidence_score
+                    }
                 }
             },status=status.HTTP_200_OK)
         except Exception as e:
@@ -185,7 +242,7 @@ def health(request):
 
     # HuggingFace model status
     try:
-        if SENTIMENT_ANALYZER is not None:
+        if TOKENIZER is not None and MODEL is not None:
             health["checks"]["model"] = "loaded"
             logger.info("HuggingFace Sentiment model -- OK")
         else:
